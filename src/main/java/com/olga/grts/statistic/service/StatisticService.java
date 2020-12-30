@@ -1,6 +1,7 @@
 package com.olga.grts.statistic.service;
 
 import com.olga.grts.statistic.Memory;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
+@Service
 public class StatisticService {
 
     private static final int CONVERT_TO_GD = 1073741824;
@@ -19,7 +21,6 @@ public class StatisticService {
     // Метрики содержат информацию о CPU, Мемory, Dick Usage
 
     public void getStatistic() {
-
 
         File cDrive = new File("/");
         System.out.println(String.format("Total space: %.2f GB",
@@ -78,7 +79,9 @@ public class StatisticService {
                 .usableSpace(drive.getUsableSpace())
                 .build();
 
-        Path path = Paths.get("/home/olga/Downloads/statistic/src/main/resources/static/" + LocalDateTime.now() +".txt");
+        String basePath = new File("").getAbsolutePath();
+        Path path = Paths.get(basePath+ "/src/main/resources/static/" + LocalDateTime.now() +".txt");
+
         try {
             Files.writeString(path, memory.toString());
         } catch (IOException e) {

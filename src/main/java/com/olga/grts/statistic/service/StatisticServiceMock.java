@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Service
 public class StatisticServiceMock implements Runnable {
 
-    private static final String PATH_TO_FILES = "/home/olga/Downloads/statistic/src/main/resources/static/";
+    private static final String PATH_TO_FILES = "/src/main/resources/static/";
 
     @Value("${isStatisticServiceMockWork}")
     private boolean isWork;
@@ -36,7 +36,8 @@ public class StatisticServiceMock implements Runnable {
                 .usableSpace(drive.getUsableSpace())
                 .build();
 
-        Path path = Paths.get(PATH_TO_FILES + LocalDateTime.now() + ".txt");
+        String basePath = new File("").getAbsolutePath();
+        Path path = Paths.get(basePath+ PATH_TO_FILES + LocalDateTime.now() +".txt");
         try {
             Files.writeString(path, memory.toString());
         } catch (IOException e) {
