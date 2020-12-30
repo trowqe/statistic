@@ -1,4 +1,4 @@
-package com.olga.grts.statistic.statistic;
+package com.olga.grts.statistic;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
