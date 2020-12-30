@@ -10,6 +10,15 @@ public class StatisticServiceIntegrationTest {
     @Autowired
     private StatisticServiceMock statisticServiceMock;
 
+    @Autowired
+    private StatisticService statisticService;
+
+    @Test
+    public void Test() throws InterruptedException {
+        statisticService.getStatisticToFile();
+    }
+
+
     @Test
     public void Test2() throws InterruptedException {
         Thread childTread = new Thread(statisticServiceMock);
