@@ -1,93 +1,84 @@
 package com.olga.grts.statistic.service;
 
-import com.olga.grts.statistic.Memory;
+import com.olga.grts.statistic.model.Cpu;
+import com.olga.grts.statistic.model.Disk;
+import com.olga.grts.statistic.model.Memory;
+import com.olga.grts.statistic.model.Statistic;
+import com.sun.management.OperatingSystemMXBean;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class StatisticService {
 
-    private static final int CONVERT_TO_GD = 1073741824;
+    public List<Statistic> getStatistics() {
 
-    private StringBuilder statistic = new StringBuilder();
-
-    //   /home/olga/Downloads/statistic/src/main/resources/static
-    // Метрики содержат информацию о CPU, Мемory, Dick Usage
-
-    public void getStatistic() {
-
-        File cDrive = new File("/");
-        System.out.println(String.format("Total space: %.2f GB",
-                (double) cDrive.getTotalSpace() / CONVERT_TO_GD));
-        statistic.append(cDrive.getTotalSpace());
-        System.out.println(String.format("Free space: %.2f GB",
-                (double) cDrive.getFreeSpace() / CONVERT_TO_GD));
-        System.out.println(String.format("Usable space: %.2f GB",
-                (double) cDrive.getUsableSpace() / CONVERT_TO_GD));
-
-        Memory memory = Memory.builder()
-                .totalSpace(cDrive.getTotalSpace())
-                .freeSpace(cDrive.getFreeSpace())
-                .usableSpace(cDrive.getUsableSpace())
-                .build();
-
-        System.out.println("-------" + memory.toString());
-
-        /*
-        OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(
-                OperatingSystemMXBean.class);
-
-        // What % load the overall system is at, from 0.0-1.0
-        System.out.println(osBean.getSystemCpuLoad());
-
-        MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
-        System.out.println(String.format("Initial memory: %.2f GB",
-                (double)memoryMXBean.getHeapMemoryUsage().getInit() /1073741824));
-        System.out.println(String.format("Used heap memory: %.2f GB",
-                (double)memoryMXBean.getHeapMemoryUsage().getUsed() /1073741824));
-        System.out.println(String.format("Max heap memory: %.2f GB",
-                (double)memoryMXBean.getHeapMemoryUsage().getMax() /1073741824));
-        System.out.println(String.format("Committed memory: %.2f GB",
-                (double)memoryMXBean.getHeapMemoryUsage().getCommitted() /1073741824));
-
-
-        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-
-        for(Long threadID : threadMXBean.getAllThreadIds()) {
-            ThreadInfo info = threadMXBean.getThreadInfo(threadID);
-            System.out.println("Thread name: " + info.getThreadName());
-            System.out.println("Thread State: " + info.getThreadState());
-            System.out.println(String.format("CPU time: %s ns",
-                    threadMXBean.getThreadCpuTime(threadID)));
-        }
-
-         */
-    }
-
-    public void getStatisticToFile(){
+        List <Statistic> statistics = new ArrayList<>(3);
         File drive = new File("/");
 
-        Memory memory = Memory.builder()
+        Disk disk = Disk.builder()
                 .totalSpace(drive.getTotalSpace())
                 .freeSpace(drive.getFreeSpace())
                 .usableSpace(drive.getUsableSpace())
                 .build();
 
-        String basePath = new File("").getAbsolutePath();
-        Path path = Paths.get(basePath+ "/src/main/resources/static/" + LocalDateTime.now() +".txt");
+        OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(
+                OperatingSystemMXBean.class);
 
+        Cpu cpu = Cpu.builder()
+                .systemCpuLoad(osBean.getSystemCpuLoad())
+                .processCpuLoad(osBean.getProcessCpuLoad())
+                .build();
+
+        Memory memory = Memory.builder()
+                .freePhysicalMemorySize(osBean.getFreePhysicalMemorySize())
+                .totalPhysicalMemorySize(osBean.getTotalPhysicalMemorySize())
+                .build();
+
+        statistics.add(disk);
+        statistics.add(cpu);
+        statistics.add(memory);
+
+        return statistics;
+    }
+
+    public void writeStatisticToFile(Path path, List<Statistic> statistics){
         try {
-            Files.writeString(path, memory.toString());
+            StringBuilder stringBuilder = new StringBuilder();
+            statistics.forEach(i->stringBuilder.append(i.toString()));
+            Files.writeString(path, stringBuilder);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
+
+    public List<Statistic> getStatisticsFromFile(Path path) throws IOException {
+        List <Statistic> statistics = new ArrayList<>(3);
+        String read = Files.readAllLines(path).get(0);
+        Disk disk = new Disk();
+        Memory memory = new Memory();
+        Cpu cpu = new Cpu();
+
+        try {
+            read = Files.readAllLines(path).get(0);
+            disk = disk.convertObjectFromToString(read);
+            memory = memory.convertObjectFromToString(read);
+            cpu = cpu.convertObjectFromToString(read);
+
+            statistics.add(disk);
+            statistics.add(cpu);
+            statistics.add(memory);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return statistics;
+    }
+
 }

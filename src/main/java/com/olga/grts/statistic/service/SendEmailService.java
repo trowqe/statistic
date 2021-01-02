@@ -12,8 +12,13 @@ public class SendEmailService {
 
     Logger logger = LoggerFactory.getLogger(SendEmailService.class);
 
+    private final JavaMailSender javaMailSender;
+
     @Autowired
-    private JavaMailSender javaMailSender;
+    public SendEmailService(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
+    }
+
 
     public void sendEmail(String to, String body, String topic) {
         logger.info("sending email");

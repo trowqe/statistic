@@ -1,6 +1,6 @@
 package com.olga.grts.statistic.service;
 
-import com.olga.grts.statistic.Memory;
+import com.olga.grts.statistic.model.Disk;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +30,7 @@ public class StatisticServiceMock implements Runnable {
 
         File drive = new File("/");
 
-        Memory memory = Memory.builder()
+        Disk disk = Disk.builder()
                 .totalSpace(drive.getTotalSpace())
                 .freeSpace(drive.getFreeSpace())
                 .usableSpace(drive.getUsableSpace())
@@ -39,7 +39,7 @@ public class StatisticServiceMock implements Runnable {
         String basePath = new File("").getAbsolutePath();
         Path path = Paths.get(basePath+ PATH_TO_FILES + LocalDateTime.now() +".txt");
         try {
-            Files.writeString(path, memory.toString());
+            Files.writeString(path, disk.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
