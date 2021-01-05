@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 @Getter
 @Setter
 @Builder
+@EqualsAndHashCode
 public class Cpu extends Statistic {
     private double systemCpuLoad;
 

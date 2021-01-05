@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 @Getter
 @Setter
 @Builder
+@EqualsAndHashCode
 public class Disk extends Statistic{
 
     private static final int CONVERT_TO_GD = 1073741824;

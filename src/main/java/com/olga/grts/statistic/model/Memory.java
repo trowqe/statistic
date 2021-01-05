@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 @Getter
 @Setter
 @Builder
+@EqualsAndHashCode
 public class Memory extends Statistic{
     //   cpu usage for the whole system
     private long freePhysicalMemorySize;

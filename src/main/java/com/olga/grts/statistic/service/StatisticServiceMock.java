@@ -1,15 +1,15 @@
 package com.olga.grts.statistic.service;
 
-import com.olga.grts.statistic.model.Disk;
+import com.olga.grts.statistic.model.Statistic;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class StatisticServiceMock implements Runnable {
@@ -22,6 +22,13 @@ public class StatisticServiceMock implements Runnable {
     @Value("${statisticFrequencyTime}")
     private long statisticFrequencyTime;
 
+    @Autowired
+    public StatisticServiceMock(StatisticService statisticService) {
+        this.statisticService = statisticService;
+    }
+
+    private StatisticService statisticService;
+
 
     //   /home/olga/Downloads/statistic/src/main/resources/static
     // Метрики содержат информацию о CPU, Мемory, Dick Usage
@@ -30,19 +37,12 @@ public class StatisticServiceMock implements Runnable {
 
         File drive = new File("/");
 
-        Disk disk = Disk.builder()
-                .totalSpace(drive.getTotalSpace())
-                .freeSpace(drive.getFreeSpace())
-                .usableSpace(drive.getUsableSpace())
-                .build();
+        List<Statistic> statisticList = statisticService.getStatistics();
 
         String basePath = new File("").getAbsolutePath();
         Path path = Paths.get(basePath+ PATH_TO_FILES + LocalDateTime.now() +".txt");
-        try {
-            Files.writeString(path, disk.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        statisticService.writeStatisticToFile(path, statisticList);
     }
 
     @Override
