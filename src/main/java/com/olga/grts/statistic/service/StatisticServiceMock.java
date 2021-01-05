@@ -1,6 +1,7 @@
 package com.olga.grts.statistic.service;
 
 import com.olga.grts.statistic.model.Statistic;
+import com.olga.grts.statistic.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,8 +14,6 @@ import java.util.List;
 
 @Service
 public class StatisticServiceMock implements Runnable {
-
-    private static final String PATH_TO_FILES = "/src/main/resources/static/";
 
     @Value("${isStatisticServiceMockWork}")
     private boolean isWork;
@@ -39,8 +38,7 @@ public class StatisticServiceMock implements Runnable {
 
         List<Statistic> statisticList = statisticService.getStatistics();
 
-        String basePath = new File("").getAbsolutePath();
-        Path path = Paths.get(basePath+ PATH_TO_FILES + LocalDateTime.now() +".txt");
+        Path path = Utils.generateFilePath();
 
         statisticService.writeStatisticToFile(path, statisticList);
     }

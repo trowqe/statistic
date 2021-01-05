@@ -1,11 +1,16 @@
 package com.olga.grts.statistic.service;
 
+import com.olga.grts.statistic.model.Statistic;
+import com.olga.grts.statistic.utils.Utils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -32,19 +37,19 @@ public class StatisticServiceIntegrationTest {
     }
 
 
-    /*
+
     @Test
-    public void main() throws IOException {
+    public void geWriteToFileAndThenReadStatistics() {
 
         List<Statistic> statisticList = statisticService.getStatistics();
-        Path path = Paths.get("src/main/resources/static/test.txt");
+        Path path = Utils.generateFilePath();
+
         statisticService.writeStatisticToFile(path, statisticList);
         List<Statistic> statisticListFromFile = statisticService.getStatisticsFromFile(path);
 
         assertEquals(statisticListFromFile, statisticList);
     }
 
-     */
 
     @Test
     public void getStatisticForTimePeriod() {
