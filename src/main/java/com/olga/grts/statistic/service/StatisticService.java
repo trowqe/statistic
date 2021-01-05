@@ -75,20 +75,22 @@ public class StatisticService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Disk disk = Disk.builder().build();
+        Disk disk = new Disk();
         Memory memory = new Memory();
         Cpu cpu = new Cpu();
 
         try {
             read = Files.readAllLines(path).get(0);
             disk = disk.convertObjectFromToString(read);
-            // disk.setDateTime();
             memory = memory.convertObjectFromToString(read);
             cpu = cpu.convertObjectFromToString(read);
 
             statistics.add(disk);
             statistics.add(cpu);
             statistics.add(memory);
+
+            LocalDateTime dateTime = convertFileNameToLocalDateTime(path);
+            statistics.forEach(x->x.setDateTime(dateTime));
         } catch (IOException e) {
             e.printStackTrace();
         }

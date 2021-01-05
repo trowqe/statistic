@@ -21,6 +21,12 @@ public class StatisticsController {
     public StatisticsController(StatisticService statisticService) {
         this.statisticService = statisticService;
     }
+
+    @GetMapping(value = "/10min")
+    public Map<LocalDateTime, List<Statistic>> getOncePer10min() {
+        return statisticService.getOncePer10Min();
+    }
+
     @GetMapping(value = "/hour")
     public Map<LocalDateTime, List<Statistic>> getOncePerHour() {
         return statisticService.getOncePerHour();
