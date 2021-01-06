@@ -18,13 +18,13 @@ public class SendEmailServiceUnitTest {
     JavaMailSender javaMailSender;
 
     @InjectMocks
-    private SendEmailService sendEmailService;
+    private EmailService emailService;
 
     @Test
     public void testSendEmailService() {
 
         Mockito.doNothing().when(javaMailSender).send(any (SimpleMailMessage.class));
 
-        sendEmailService.sendEmail("trowqe@gmail.com", "body", "topic");
+        emailService.sendEmail("trowqe@gmail.com", "body", "topic");
     }
 }

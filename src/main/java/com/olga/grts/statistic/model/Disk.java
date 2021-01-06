@@ -19,10 +19,6 @@ public class Disk extends Statistic{
     private long freeSpace;
     private long usableSpace;
 
-    private double convertToGB(long metric) {
-        return (double) metric / CONVERT_TO_GD;
-    }
-
     @Override
     public String toString() {
         return "Disk{" +

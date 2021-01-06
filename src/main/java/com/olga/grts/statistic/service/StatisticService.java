@@ -5,6 +5,8 @@ import com.olga.grts.statistic.model.Disk;
 import com.olga.grts.statistic.model.Memory;
 import com.olga.grts.statistic.model.Statistic;
 import com.sun.management.OperatingSystemMXBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -25,6 +27,31 @@ import java.util.stream.Stream;
 
 @Service
 public class StatisticService {
+
+    //cpu
+    @Value("${systemCpuLoadThreshold}")
+    private double systemCpuLoadThreshold;
+    @Value("${processCpuLoadThreshold}")
+    private double processCpuLoadThreshold;
+
+    //disk
+    @Value("${usableSpaceThreshold}")
+    private double usableSpaceThreshold;
+
+    //memory
+    @Value("${freePhysicalMemorySizeThreshold}")
+    private long freePhysicalMemorySizeThreshold;
+
+    @Value("${mailToSendThreshold}")
+    private String mailToSendThreshold;
+
+
+    private EmailService emailService;
+
+    @Autowired
+    public StatisticService(EmailService emailService) {
+        this.emailService = emailService;
+    }
 
     public List<Statistic> getStatistics() {
 
@@ -67,7 +94,7 @@ public class StatisticService {
         }
     }
 
-    public static List<Statistic> getStatisticsFromFile(Path path) {
+    public List<Statistic> getStatisticsFromFile(Path path) {
         List<Statistic> statistics = new ArrayList<>(3);
         String read = null;
         try {
@@ -90,11 +117,18 @@ public class StatisticService {
             statistics.add(memory);
 
             LocalDateTime dateTime = convertFileNameToLocalDateTime(path);
-            statistics.forEach(x->x.setDateTime(dateTime));
+            statistics.forEach(x -> x.setDateTime(dateTime));
+            statistics.forEach(this::checkStatisticAnsSendEmailIfFalse);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return statistics;
+    }
+
+    private void checkStatisticAnsSendEmailIfFalse(Statistic statistic) {
+        if (checkStatisticThreshold(statistic)) {
+            emailService.sendEmail(mailToSendThreshold, statistic.toString(), "threshold");
+        }
     }
 
 
@@ -122,7 +156,7 @@ public class StatisticService {
 
             result = walk.filter(Files::isRegularFile)
                     .filter(x -> isBetween(x, start, finish))
-                    .collect(Collectors.toMap(StatisticService::convertFileNameToLocalDateTime, StatisticService::getStatisticsFromFile));
+                    .collect(Collectors.toMap(StatisticService::convertFileNameToLocalDateTime, this::getStatisticsFromFile));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -159,5 +193,16 @@ public class StatisticService {
         return x.isAfter(startStatistic) && x.isBefore(finishStatistic);
     }
 
-
+    //TODO: can't do this with interface because @Value in pojo null
+    private boolean checkStatisticThreshold(Statistic statistic) {
+        if (statistic instanceof Cpu) {
+            return ((Cpu) statistic).getSystemCpuLoad() > systemCpuLoadThreshold
+                    || ((Cpu) statistic).getProcessCpuLoad() > processCpuLoadThreshold;
+        } else if (statistic instanceof Disk) {
+            return ((Disk) statistic).getUsableSpace() < usableSpaceThreshold;
+        } else if (statistic instanceof Memory) {
+            return ((Memory) statistic).getFreePhysicalMemorySize() < freePhysicalMemorySizeThreshold;
+        }
+        return true;
+    }
 }
